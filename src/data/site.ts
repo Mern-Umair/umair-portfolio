@@ -14,7 +14,7 @@ import realEstate from "../../public/projects/realestate.webp";
  */
 
 export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://umair-tahir.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://umair-portfolio-cyan-phi.vercel.app";
 
 export const profile = {
   name: "Umair Tahir",
