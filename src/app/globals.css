@@ -1,0 +1,294 @@
+@import "tailwindcss";
+
+/* Dark is the default theme; [data-theme="light"] swaps the same tokens. */
+:root {
+  --bg: #0b0b0c;
+  --surface: #131315;
+  --surface-2: #1b1b1f;
+  --line: #27272c;
+  --fg: #f4f4f5;
+  --muted: #a1a1aa;
+  --subtle: #8a8a94;
+  --accent: #fb923c;
+  --accent-bg: #fb923c;
+  --accent-fg: #0b0b0c;
+  --accent-soft: rgb(251 146 60 / 0.12);
+  --ok: #34d399;
+  --ok-soft: rgb(52 211 153 / 0.12);
+  --danger: #f87171;
+  --danger-soft: rgb(248 113 113 / 0.12);
+  --dot: rgb(255 255 255 / 0.13);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f3f3f1;
+  --line: #e3e3df;
+  --fg: #18181b;
+  --muted: #52525b;
+  --subtle: #63636b;
+  --accent: #c2410c;
+  --accent-bg: #c2410c;
+  --accent-fg: #ffffff;
+  --accent-soft: rgb(194 65 12 / 0.09);
+  --ok: #047857;
+  --ok-soft: rgb(4 120 87 / 0.1);
+  --danger: #b91c1c;
+  --danger-soft: rgb(185 28 28 / 0.09);
+  --dot: rgb(0 0 0 / 0.16);
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-accent-bg: var(--accent-bg);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+}
+
+/* Safety net: a 3D-transformed element can project slightly outside its box; never let that add a
+   horizontal scrollbar. `clip` (unlike `hidden`) keeps the sticky header working. */
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent-bg);
+  color: var(--accent-fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Motion
+   Everything below is transform/opacity only, and is switched off for reduced-motion users.
+   ------------------------------------------------------------------------------------------ */
+
+/* Scroll-driven entrance: the block unfolds in 3D as it enters the viewport. Progress is tied to
+   scroll position, so it plays forwards and backwards with the scroll. */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) translateY(36px) rotateX(-12deg) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) translateY(0) rotateX(0deg) scale(1);
+  }
+}
+
+/* A stronger version for large panels: they start leaning away from the viewer and stand up flat.
+   The lean is negative (far edge recedes) so the projected box never grows wider than the page. */
+@keyframes reveal-unfold {
+  from {
+    opacity: 0.15;
+    transform: perspective(1400px) translateY(70px) rotateX(-30deg) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1400px) translateY(0) rotateX(0deg) scale(1);
+  }
+}
+
+@keyframes grow-line {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes scroll-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Reading progress bar under the header. */
+.scroll-progress {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  background: var(--accent-bg);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      transform-origin: 50% 0;
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+    .reveal-unfold {
+      transform-origin: 50% 0;
+      animation: reveal-unfold linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 34%;
+    }
+    /* The experience timeline draws itself as the section scrolls past. */
+    .timeline::before {
+      transform-origin: 50% 0;
+      animation: grow-line linear both;
+      animation-timeline: view();
+      animation-range: entry 15% cover 55%;
+    }
+    .scroll-progress {
+      animation: scroll-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+/* Hero headline: each word swings up on page load. */
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em) rotateX(-75deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.word {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .words {
+    perspective: 900px;
+  }
+  .word {
+    transform-origin: 50% 100%;
+    animation: word-rise 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+/* Cursor spotlight: PointerEffects writes --mx/--my on the hovered .spot element. */
+.spot {
+  position: relative;
+  isolation: isolate;
+}
+
+.spot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .spot:hover::before {
+    opacity: 1;
+  }
+}
+
+/* 3D tilt: PointerEffects writes --rx/--ry on the hovered [data-tilt] element. */
+[data-tilt] {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease-out;
+}
+
+/* Direct children that should float above the tilted surface. pointer-events stay off so the
+   whole-card link underneath still receives the click. */
+[data-tilt] > .tilt-pop {
+  transform: translateZ(26px);
+  pointer-events: none;
+}
+
+/* Hero portrait: HeroPortrait writes --rx/--ry/--px/--py from the cursor position. */
+.portrait {
+  perspective: 1100px;
+}
+
+.portrait-stage {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+}
+
+.portrait-chip {
+  animation: chip-float 6s ease-in-out infinite;
+}
+
+@keyframes chip-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+/* Touch screens have no cursor to follow, so the portrait sways gently on its own. */
+@keyframes portrait-idle {
+  0%,
+  100% {
+    transform: rotateX(2deg) rotateY(-7deg);
+  }
+  50% {
+    transform: rotateX(-2deg) rotateY(7deg);
+  }
+}
+
+@media (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .portrait-stage {
+    animation: portrait-idle 9s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
